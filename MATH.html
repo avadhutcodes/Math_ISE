@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Venn Engine: Interactive Set &amp; Venn Diagram Engine</title>
+    <meta
+      name="description"
+      content="Enter sets, write a set expression, and see the exact region it selects on a three-set Venn diagram."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="MATH.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <h1>Venn<span>DX</span></h1>
+      </div>
+      <button
+        type="button"
+        id="theme"
+        class="btn ghost"
+        aria-label="Switch between dark and light theme"
+      >
+        Light mode
+      </button>
+    </header>
+
+    <main class="layout">
+      <section class="card sets" aria-labelledby="sets-h">
+        <h2 id="sets-h">Your sets</h2>
+        <p class="hint">
+          Type an element and press Enter, comma or space. Ranges like
+          <b>1-8</b> expand automatically.
+        </p>
+
+        <div class="set-card a">
+          <div class="set-head">
+            <i class="dot"></i><b>Set A</b
+            ><span class="count" id="cnt-A">0</span>
+          </div>
+          <div class="chipbox" id="chips-A">
+            <input
+              class="chip-in"
+              placeholder="add element"
+              aria-label="Add element to set A"
+              autocomplete="off"
+            />
+          </div>
+          <textarea id="setA" hidden></textarea>
+        </div>
+        <div class="set-card b">
+          <div class="set-head">
+            <i class="dot"></i><b>Set B</b
+            ><span class="count" id="cnt-B">0</span>
+          </div>
+          <div class="chipbox" id="chips-B">
+            <input
+              class="chip-in"
+              placeholder="add element"
+              aria-label="Add element to set B"
+              autocomplete="off"
+            />
+          </div>
+          <textarea id="setB" hidden></textarea>
+        </div>
+        <div class="set-card c">
+          <div class="set-head">
+            <i class="dot"></i><b>Set C</b
+            ><span class="count" id="cnt-C">0</span>
+          </div>
+          <div class="chipbox" id="chips-C">
+            <input
+              class="chip-in"
+              placeholder="add element"
+              aria-label="Add element to set C"
+              autocomplete="off"
+            />
+          </div>
+          <textarea id="setC" hidden></textarea>
+        </div>
+        <div class="set-card u">
+          <div class="set-head">
+            <i class="dot"></i><b>Other elements in U</b
+            ><span class="count" id="cnt-extras">0</span>
+          </div>
+          <div class="chipbox" id="chips-extras">
+            <input
+              class="chip-in"
+              placeholder="in U, in no set"
+              aria-label="Add other element to universe"
+              autocomplete="off"
+            />
+          </div>
+          <textarea id="extras" hidden></textarea>
+        </div>
+
+        <h3>Presets</h3>
+        <div class="chips" id="presets"></div>
+        <div class="row">
+          <button type="button" class="btn" id="btn-random">Randomize</button>
+          <button type="button" class="btn ghost" id="btn-clear">
+            Clear all
+          </button>
+        </div>
+      </section>
+
+      <section class="stage" aria-labelledby="stage-h">
+        <h2 id="stage-h" class="sr-only">Venn diagram</h2>
+        <div class="expr-bar">
+          <label for="expr" class="expr-label">Expression</label>
+          <input
+            id="expr"
+            type="text"
+            value="(A ∪ B) ∩ C′"
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="expr-error expr-help"
+          />
+          <div
+            class="keys"
+            id="keys-main"
+            role="group"
+            aria-label="Insert symbol"
+          ></div>
+          <p id="expr-error" class="error" role="alert"></p>
+          <div
+            class="chips"
+            id="expr-chips"
+            role="group"
+            aria-label="Example expressions"
+          ></div>
+        </div>
+        <svg
+          id="venn"
+          role="img"
+          aria-label="Three-set Venn diagram. Selected regions are filled."
+        ></svg>
+        <div class="row tools">
+          <button type="button" class="btn ghost" id="btn-svg">
+            Download diagram (SVG)
+          </button>
+          <span class="muted small"
+            >Tip: click any region of the diagram to build an expression from
+            it.</span
+          >
+        </div>
+        <p class="legend" id="expr-help">
+          Complement is relative to U. Precedence: complement, then ∩, then ∪ −
+          Δ left to right. Shortcuts: <kbd>|</kbd> ∪, <kbd>&amp;</kbd> ∩,
+          <kbd>\</kbd> −, <kbd>^</kbd> Δ, <kbd>'</kbd> or
+          <kbd>!</kbd> complement.
+        </p>
+      </section>
+
+      <section class="card results" aria-labelledby="res-h">
+        <h2 id="res-h" class="sr-only">Output</h2>
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" class="tab on" data-tab="result">
+            Result
+          </button>
+          <button type="button" role="tab" class="tab" data-tab="steps">
+            Steps
+          </button>
+          <button type="button" role="tab" class="tab" data-tab="regions">
+            Regions
+          </button>
+          <button type="button" role="tab" class="tab" data-tab="analysis">
+            Analysis
+          </button>
+        </div>
+        <div class="panes" aria-live="polite">
+          <div class="pane" id="tab-result"></div>
+          <div class="pane" id="tab-steps" hidden></div>
+          <div class="pane" id="tab-regions" hidden></div>
+          <div class="pane" id="tab-analysis" hidden></div>
+        </div>
+      </section>
+
+      <section class="card identity" aria-labelledby="id-h">
+        <h2 id="id-h">Check an identity</h2>
+        <p class="hint">
+          Do two expressions select the same region for every possible choice of
+          sets? The truth table checks all 8 regions.
+        </p>
+        <div class="id-inputs">
+          <label class="field" for="lhs"
+            ><span class="field-name">Left side</span
+            ><input
+              id="lhs"
+              type="text"
+              value="(A ∪ B)′"
+              autocomplete="off"
+              spellcheck="false"
+          /></label>
+          <span class="eq" aria-hidden="true">=</span>
+          <label class="field" for="rhs"
+            ><span class="field-name">Right side</span
+            ><input
+              id="rhs"
+              type="text"
+              value="A′ ∩ B′"
+              autocomplete="off"
+              spellcheck="false"
+          /></label>
+        </div>
+        <div
+          class="keys"
+          id="keys-id"
+          role="group"
+          aria-label="Insert symbol"
+        ></div>
+        <div
+          class="chips"
+          id="id-chips"
+          role="group"
+          aria-label="Example identities"
+        ></div>
+        <div id="identity-out"></div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p>
+        Discrete Mathematics (7MA206), ISE-2, Track B. Runs entirely in your
+        browser.
+      </p>
+    </footer>
+    <script src="MATH.js"></script>
+  </body>
+</html>
